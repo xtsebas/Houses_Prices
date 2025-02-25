@@ -1,0 +1,82 @@
+,Variable,Tipo (Cuantitativa o Cualitativa),Discreta o Continua / Nominal o Ordinal,Tipo del Dato,Ejemplo,Descripción
+Id,Id,Cuantitativa,Discreta,int64,1,Identificador único de la propiedad.
+MSSubClass,MSSubClass,Cuantitativa,Discreta,int64,60,Clase del edificio según el tipo de vivienda.
+MSZoning,MSZoning,Cualitativa,Nominal,object,RL,Clasificación de la zona en la que se encuentra la propiedad.
+LotFrontage,LotFrontage,Cuantitativa,Continua,float64,65.0,Longitud de la fachada de la propiedad en pies.
+LotArea,LotArea,Cuantitativa,Discreta,int64,8450,Tamaño total del lote en pies cuadrados.
+Street,Street,Cualitativa,Nominal,object,Pave,Tipo de calle de acceso a la propiedad.
+Alley,Alley,Cualitativa,Nominal,object,nan,Tipo de callejón de acceso a la propiedad.
+LotShape,LotShape,Cualitativa,Nominal,object,Reg,Forma general del lote.
+LandContour,LandContour,Cualitativa,Nominal,object,Lvl,Plano de la propiedad con respecto al suelo circundante.
+Utilities,Utilities,Cualitativa,Nominal,object,AllPub,Servicios públicos disponibles para la propiedad.
+LotConfig,LotConfig,Cualitativa,Nominal,object,Inside,Configuración del lote en relación con las propiedades vecinas.
+LandSlope,LandSlope,Cualitativa,Nominal,object,Gtl,Pendiente del terreno.
+Neighborhood,Neighborhood,Cualitativa,Nominal,object,CollgCr,Barrio en el que se encuentra la propiedad.
+Condition1,Condition1,Cualitativa,Nominal,object,Norm,Condición de la propiedad con respecto a carreteras o ferrocarriles.
+Condition2,Condition2,Cualitativa,Nominal,object,Norm,Condición secundaria en relación con carreteras o ferrocarriles.
+BldgType,BldgType,Cualitativa,Nominal,object,1Fam,"Tipo de vivienda (unifamiliar, dúplex, etc.)."
+HouseStyle,HouseStyle,Cualitativa,Nominal,object,2Story,Estilo arquitectónico de la vivienda.
+OverallQual,OverallQual,Cuantitativa,Discreta,int64,7,Calidad general de la vivienda en una escala del 1 al 10.
+OverallCond,OverallCond,Cuantitativa,Discreta,int64,5,Condición general de la vivienda en una escala del 1 al 10.
+YearBuilt,YearBuilt,Cuantitativa,Discreta,int64,2003,Año en que se construyó la vivienda.
+YearRemodAdd,YearRemodAdd,Cuantitativa,Discreta,int64,2003,Año de la última remodelación o ampliación.
+RoofStyle,RoofStyle,Cualitativa,Nominal,object,Gable,Tipo de techo de la vivienda.
+RoofMatl,RoofMatl,Cualitativa,Nominal,object,CompShg,Material del techo.
+Exterior1st,Exterior1st,Cualitativa,Nominal,object,VinylSd,Material exterior principal de la vivienda.
+Exterior2nd,Exterior2nd,Cualitativa,Nominal,object,VinylSd,Material exterior secundario de la vivienda.
+MasVnrType,MasVnrType,Cualitativa,Nominal,object,BrkFace,Tipo de recubrimiento de mampostería en la fachada.
+MasVnrArea,MasVnrArea,Cuantitativa,Continua,float64,196.0,Área de recubrimiento de mampostería en pies cuadrados.
+ExterQual,ExterQual,Cualitativa,Nominal,object,Gd,Calidad del material exterior en una escala del 1 al 5.
+ExterCond,ExterCond,Cualitativa,Nominal,object,TA,Condición general del material exterior.
+Foundation,Foundation,Cualitativa,Nominal,object,PConc,Tipo de cimentación de la vivienda.
+BsmtQual,BsmtQual,Cualitativa,Nominal,object,Gd,Altura del sótano.
+BsmtCond,BsmtCond,Cualitativa,Nominal,object,TA,Condición general del sótano.
+BsmtExposure,BsmtExposure,Cualitativa,Nominal,object,No,Nivel de exposición del sótano a elementos externos.
+BsmtFinType1,BsmtFinType1,Cualitativa,Nominal,object,GLQ,Tipo de acabado del sótano.
+BsmtFinSF1,BsmtFinSF1,Cuantitativa,Continua,float64,706.0,Área terminada del sótano en pies cuadrados.
+BsmtFinType2,BsmtFinType2,Cualitativa,Nominal,object,Unf,Segundo tipo de acabado del sótano.
+BsmtFinSF2,BsmtFinSF2,Cuantitativa,Continua,float64,0.0,Área de la segunda sección terminada del sótano.
+BsmtUnfSF,BsmtUnfSF,Cuantitativa,Continua,float64,150.0,Área sin terminar del sótano en pies cuadrados.
+TotalBsmtSF,TotalBsmtSF,Cuantitativa,Continua,float64,856.0,Área total del sótano en pies cuadrados.
+Heating,Heating,Cualitativa,Nominal,object,GasA,Tipo de calefacción de la vivienda.
+HeatingQC,HeatingQC,Cualitativa,Nominal,object,Ex,Calidad y estado del sistema de calefacción.
+CentralAir,CentralAir,Cualitativa,Nominal,object,Y,Indica si la vivienda tiene aire acondicionado central.
+Electrical,Electrical,Cualitativa,Nominal,object,SBrkr,Tipo de sistema eléctrico instalado.
+1stFlrSF,1stFlrSF,Cuantitativa,Discreta,int64,856,Área de la primera planta en pies cuadrados.
+2ndFlrSF,2ndFlrSF,Cuantitativa,Discreta,int64,854,Área de la segunda planta en pies cuadrados.
+LowQualFinSF,LowQualFinSF,Cuantitativa,Discreta,int64,0,Área terminada de baja calidad en pies cuadrados.
+GrLivArea,GrLivArea,Cuantitativa,Discreta,int64,1710,Área habitable total sobre el nivel del suelo.
+BsmtFullBath,BsmtFullBath,Cuantitativa,Continua,float64,1.0,Número de baños completos en el sótano.
+BsmtHalfBath,BsmtHalfBath,Cuantitativa,Continua,float64,0.0,Número de baños medios en el sótano.
+FullBath,FullBath,Cuantitativa,Discreta,int64,2,Número de baños completos sobre el nivel del suelo.
+HalfBath,HalfBath,Cuantitativa,Discreta,int64,1,Número de baños medios sobre el nivel del suelo.
+BedroomAbvGr,BedroomAbvGr,Cuantitativa,Discreta,int64,3,Número de habitaciones por encima del suelo.
+KitchenAbvGr,KitchenAbvGr,Cuantitativa,Discreta,int64,1,Número de cocinas en la vivienda.
+KitchenQual,KitchenQual,Cualitativa,Nominal,object,Gd,Calidad de la cocina.
+TotRmsAbvGrd,TotRmsAbvGrd,Cuantitativa,Discreta,int64,8,Número total de habitaciones por encima del nivel del suelo.
+Functional,Functional,Cualitativa,Nominal,object,Typ,Funcionalidad general de la vivienda.
+Fireplaces,Fireplaces,Cuantitativa,Discreta,int64,0,Número de chimeneas en la vivienda.
+FireplaceQu,FireplaceQu,Cualitativa,Nominal,object,nan,Calidad de la chimenea.
+GarageType,GarageType,Cualitativa,Nominal,object,Attchd,Ubicación del garaje con respecto a la vivienda.
+GarageYrBlt,GarageYrBlt,Cuantitativa,Continua,float64,2003.0,Año en que se construyó el garaje.
+GarageFinish,GarageFinish,Cualitativa,Nominal,object,RFn,Acabado interior del garaje.
+GarageCars,GarageCars,Cuantitativa,Continua,float64,2.0,Capacidad del garaje en número de coches.
+GarageArea,GarageArea,Cuantitativa,Continua,float64,548.0,Área del garaje en pies cuadrados.
+GarageQual,GarageQual,Cualitativa,Nominal,object,TA,Calidad general del garaje.
+GarageCond,GarageCond,Cualitativa,Nominal,object,TA,Condición general del garaje.
+PavedDrive,PavedDrive,Cualitativa,Nominal,object,Y,Tipo de pavimentación de la entrada del garaje.
+WoodDeckSF,WoodDeckSF,Cuantitativa,Discreta,int64,0,Área de la plataforma de madera en pies cuadrados.
+OpenPorchSF,OpenPorchSF,Cuantitativa,Discreta,int64,61,Área de porche abierto en pies cuadrados.
+EnclosedPorch,EnclosedPorch,Cuantitativa,Discreta,int64,0,Área de porche cerrado en pies cuadrados.
+3SsnPorch,3SsnPorch,Cuantitativa,Discreta,int64,0,Área del porche de tres estaciones en pies cuadrados.
+ScreenPorch,ScreenPorch,Cuantitativa,Discreta,int64,0,Área del porche con pantalla en pies cuadrados.
+PoolArea,PoolArea,Cuantitativa,Discreta,int64,0,Área de la piscina en pies cuadrados.
+PoolQC,PoolQC,Cualitativa,Nominal,object,nan,Calidad de la piscina.
+Fence,Fence,Cualitativa,Nominal,object,nan,Tipo de cerca de la propiedad.
+MiscFeature,MiscFeature,Cualitativa,Nominal,object,nan,Características adicionales de la propiedad.
+MiscVal,MiscVal,Cuantitativa,Discreta,int64,0,Valor de las características adicionales.
+MoSold,MoSold,Cuantitativa,Discreta,int64,2,Mes en el que se vendió la vivienda.
+YrSold,YrSold,Cuantitativa,Discreta,int64,2008,Año en el que se vendió la vivienda.
+SaleType,SaleType,Cualitativa,Nominal,object,WD,Tipo de venta.
+SaleCondition,SaleCondition,Cualitativa,Nominal,object,Normal,Condición de la venta.
+SalePrice,SalePrice,Cuantitativa,Continua,float64,208500.0,Precio final de venta de la vivienda.
