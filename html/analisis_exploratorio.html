@@ -1,0 +1,2736 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Se combinaran los datos de train y test para tener un dataset completo</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="analisis_exploratorio_files/libs/clipboard/clipboard.min.js"></script>
+<script src="analisis_exploratorio_files/libs/quarto-html/quarto.js"></script>
+<script src="analisis_exploratorio_files/libs/quarto-html/popper.min.js"></script>
+<script src="analisis_exploratorio_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="analisis_exploratorio_files/libs/quarto-html/anchor.min.js"></script>
+<link href="analisis_exploratorio_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="analisis_exploratorio_files/libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="analisis_exploratorio_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="analisis_exploratorio_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="analisis_exploratorio_files/libs/bootstrap/bootstrap-8a79a254b8e706d3c925cde0a310d4f0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Se combinaran los datos de train y test para tener un dataset completo</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="cell-1" class="cell" data-execution_count="50">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> st</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>test_data <span class="op">=</span> pd.read_csv(<span class="st">"csv/test.csv"</span>,  encoding<span class="op">=</span><span class="st">'latin-1'</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>train_data <span class="op">=</span> pd.read_csv(<span class="st">"csv/train.csv"</span>,  encoding<span class="op">=</span><span class="st">'latin-1'</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Leer datos de un csv</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>test_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="50">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Id</th>
+<th data-quarto-table-cell-role="th">MSSubClass</th>
+<th data-quarto-table-cell-role="th">MSZoning</th>
+<th data-quarto-table-cell-role="th">LotFrontage</th>
+<th data-quarto-table-cell-role="th">LotArea</th>
+<th data-quarto-table-cell-role="th">Street</th>
+<th data-quarto-table-cell-role="th">Alley</th>
+<th data-quarto-table-cell-role="th">LotShape</th>
+<th data-quarto-table-cell-role="th">LandContour</th>
+<th data-quarto-table-cell-role="th">Utilities</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">ScreenPorch</th>
+<th data-quarto-table-cell-role="th">PoolArea</th>
+<th data-quarto-table-cell-role="th">PoolQC</th>
+<th data-quarto-table-cell-role="th">Fence</th>
+<th data-quarto-table-cell-role="th">MiscFeature</th>
+<th data-quarto-table-cell-role="th">MiscVal</th>
+<th data-quarto-table-cell-role="th">MoSold</th>
+<th data-quarto-table-cell-role="th">YrSold</th>
+<th data-quarto-table-cell-role="th">SaleType</th>
+<th data-quarto-table-cell-role="th">SaleCondition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1461</td>
+<td>20</td>
+<td>RH</td>
+<td>80.0</td>
+<td>11622</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>120</td>
+<td>0</td>
+<td>NaN</td>
+<td>MnPrv</td>
+<td>NaN</td>
+<td>0</td>
+<td>6</td>
+<td>2010</td>
+<td>WD</td>
+<td>Normal</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1462</td>
+<td>20</td>
+<td>RL</td>
+<td>81.0</td>
+<td>14267</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>Gar2</td>
+<td>12500</td>
+<td>6</td>
+<td>2010</td>
+<td>WD</td>
+<td>Normal</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1463</td>
+<td>60</td>
+<td>RL</td>
+<td>74.0</td>
+<td>13830</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>MnPrv</td>
+<td>NaN</td>
+<td>0</td>
+<td>3</td>
+<td>2010</td>
+<td>WD</td>
+<td>Normal</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1464</td>
+<td>60</td>
+<td>RL</td>
+<td>78.0</td>
+<td>9978</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>6</td>
+<td>2010</td>
+<td>WD</td>
+<td>Normal</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1465</td>
+<td>120</td>
+<td>RL</td>
+<td>43.0</td>
+<td>5005</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>HLS</td>
+<td>AllPub</td>
+<td>...</td>
+<td>144</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>1</td>
+<td>2010</td>
+<td>WD</td>
+<td>Normal</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1454</td>
+<td>2915</td>
+<td>160</td>
+<td>RM</td>
+<td>21.0</td>
+<td>1936</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>6</td>
+<td>2006</td>
+<td>WD</td>
+<td>Normal</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1455</td>
+<td>2916</td>
+<td>160</td>
+<td>RM</td>
+<td>21.0</td>
+<td>1894</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>4</td>
+<td>2006</td>
+<td>WD</td>
+<td>Abnorml</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1456</td>
+<td>2917</td>
+<td>20</td>
+<td>RL</td>
+<td>160.0</td>
+<td>20000</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>9</td>
+<td>2006</td>
+<td>WD</td>
+<td>Abnorml</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1457</td>
+<td>2918</td>
+<td>85</td>
+<td>RL</td>
+<td>62.0</td>
+<td>10441</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>MnPrv</td>
+<td>Shed</td>
+<td>700</td>
+<td>7</td>
+<td>2006</td>
+<td>WD</td>
+<td>Normal</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1458</td>
+<td>2919</td>
+<td>60</td>
+<td>RL</td>
+<td>74.0</td>
+<td>9627</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>11</td>
+<td>2006</td>
+<td>WD</td>
+<td>Normal</td>
+</tr>
+</tbody>
+</table>
+
+<p>1459 rows × 80 columns</p>
+</div>
+</div>
+</div>
+<div id="cell-2" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>train_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Id</th>
+<th data-quarto-table-cell-role="th">MSSubClass</th>
+<th data-quarto-table-cell-role="th">MSZoning</th>
+<th data-quarto-table-cell-role="th">LotFrontage</th>
+<th data-quarto-table-cell-role="th">LotArea</th>
+<th data-quarto-table-cell-role="th">Street</th>
+<th data-quarto-table-cell-role="th">Alley</th>
+<th data-quarto-table-cell-role="th">LotShape</th>
+<th data-quarto-table-cell-role="th">LandContour</th>
+<th data-quarto-table-cell-role="th">Utilities</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">PoolArea</th>
+<th data-quarto-table-cell-role="th">PoolQC</th>
+<th data-quarto-table-cell-role="th">Fence</th>
+<th data-quarto-table-cell-role="th">MiscFeature</th>
+<th data-quarto-table-cell-role="th">MiscVal</th>
+<th data-quarto-table-cell-role="th">MoSold</th>
+<th data-quarto-table-cell-role="th">YrSold</th>
+<th data-quarto-table-cell-role="th">SaleType</th>
+<th data-quarto-table-cell-role="th">SaleCondition</th>
+<th data-quarto-table-cell-role="th">SalePrice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>60</td>
+<td>RL</td>
+<td>65.0</td>
+<td>8450</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>2</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>208500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>20</td>
+<td>RL</td>
+<td>80.0</td>
+<td>9600</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>5</td>
+<td>2007</td>
+<td>WD</td>
+<td>Normal</td>
+<td>181500</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>60</td>
+<td>RL</td>
+<td>68.0</td>
+<td>11250</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>9</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>223500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>70</td>
+<td>RL</td>
+<td>60.0</td>
+<td>9550</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>2</td>
+<td>2006</td>
+<td>WD</td>
+<td>Abnorml</td>
+<td>140000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>60</td>
+<td>RL</td>
+<td>84.0</td>
+<td>14260</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>12</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>250000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1455</td>
+<td>1456</td>
+<td>60</td>
+<td>RL</td>
+<td>62.0</td>
+<td>7917</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>8</td>
+<td>2007</td>
+<td>WD</td>
+<td>Normal</td>
+<td>175000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1456</td>
+<td>1457</td>
+<td>20</td>
+<td>RL</td>
+<td>85.0</td>
+<td>13175</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>MnPrv</td>
+<td>NaN</td>
+<td>0</td>
+<td>2</td>
+<td>2010</td>
+<td>WD</td>
+<td>Normal</td>
+<td>210000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1457</td>
+<td>1458</td>
+<td>70</td>
+<td>RL</td>
+<td>66.0</td>
+<td>9042</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>GdPrv</td>
+<td>Shed</td>
+<td>2500</td>
+<td>5</td>
+<td>2010</td>
+<td>WD</td>
+<td>Normal</td>
+<td>266500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1458</td>
+<td>1459</td>
+<td>20</td>
+<td>RL</td>
+<td>68.0</td>
+<td>9717</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>4</td>
+<td>2010</td>
+<td>WD</td>
+<td>Normal</td>
+<td>142125</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1459</td>
+<td>1460</td>
+<td>20</td>
+<td>RL</td>
+<td>75.0</td>
+<td>9937</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>6</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>147500</td>
+</tr>
+</tbody>
+</table>
+
+<p>1460 rows × 81 columns</p>
+</div>
+</div>
+</div>
+<div id="cell-4" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>house_price <span class="op">=</span> pd.concat([train_data, test_data], ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>house_price</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Id</th>
+<th data-quarto-table-cell-role="th">MSSubClass</th>
+<th data-quarto-table-cell-role="th">MSZoning</th>
+<th data-quarto-table-cell-role="th">LotFrontage</th>
+<th data-quarto-table-cell-role="th">LotArea</th>
+<th data-quarto-table-cell-role="th">Street</th>
+<th data-quarto-table-cell-role="th">Alley</th>
+<th data-quarto-table-cell-role="th">LotShape</th>
+<th data-quarto-table-cell-role="th">LandContour</th>
+<th data-quarto-table-cell-role="th">Utilities</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">PoolArea</th>
+<th data-quarto-table-cell-role="th">PoolQC</th>
+<th data-quarto-table-cell-role="th">Fence</th>
+<th data-quarto-table-cell-role="th">MiscFeature</th>
+<th data-quarto-table-cell-role="th">MiscVal</th>
+<th data-quarto-table-cell-role="th">MoSold</th>
+<th data-quarto-table-cell-role="th">YrSold</th>
+<th data-quarto-table-cell-role="th">SaleType</th>
+<th data-quarto-table-cell-role="th">SaleCondition</th>
+<th data-quarto-table-cell-role="th">SalePrice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>60</td>
+<td>RL</td>
+<td>65.0</td>
+<td>8450</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>2</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>208500.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>20</td>
+<td>RL</td>
+<td>80.0</td>
+<td>9600</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>5</td>
+<td>2007</td>
+<td>WD</td>
+<td>Normal</td>
+<td>181500.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>60</td>
+<td>RL</td>
+<td>68.0</td>
+<td>11250</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>9</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>223500.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>70</td>
+<td>RL</td>
+<td>60.0</td>
+<td>9550</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>2</td>
+<td>2006</td>
+<td>WD</td>
+<td>Abnorml</td>
+<td>140000.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>60</td>
+<td>RL</td>
+<td>84.0</td>
+<td>14260</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>12</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>250000.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2914</td>
+<td>2915</td>
+<td>160</td>
+<td>RM</td>
+<td>21.0</td>
+<td>1936</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>6</td>
+<td>2006</td>
+<td>WD</td>
+<td>Normal</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2915</td>
+<td>2916</td>
+<td>160</td>
+<td>RM</td>
+<td>21.0</td>
+<td>1894</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>4</td>
+<td>2006</td>
+<td>WD</td>
+<td>Abnorml</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2916</td>
+<td>2917</td>
+<td>20</td>
+<td>RL</td>
+<td>160.0</td>
+<td>20000</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>9</td>
+<td>2006</td>
+<td>WD</td>
+<td>Abnorml</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2917</td>
+<td>2918</td>
+<td>85</td>
+<td>RL</td>
+<td>62.0</td>
+<td>10441</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>MnPrv</td>
+<td>Shed</td>
+<td>700</td>
+<td>7</td>
+<td>2006</td>
+<td>WD</td>
+<td>Normal</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2918</td>
+<td>2919</td>
+<td>60</td>
+<td>RL</td>
+<td>74.0</td>
+<td>9627</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>...</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>11</td>
+<td>2006</td>
+<td>WD</td>
+<td>Normal</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+<p>2919 rows × 81 columns</p>
+</div>
+</div>
+</div>
+<section id="resumen-de-los-datos" class="level2">
+<h2 class="anchored" data-anchor-id="resumen-de-los-datos">Resumen de los datos</h2>
+<div id="cell-6" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>house_price.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Id</th>
+<th data-quarto-table-cell-role="th">MSSubClass</th>
+<th data-quarto-table-cell-role="th">LotFrontage</th>
+<th data-quarto-table-cell-role="th">LotArea</th>
+<th data-quarto-table-cell-role="th">OverallQual</th>
+<th data-quarto-table-cell-role="th">OverallCond</th>
+<th data-quarto-table-cell-role="th">YearBuilt</th>
+<th data-quarto-table-cell-role="th">YearRemodAdd</th>
+<th data-quarto-table-cell-role="th">MasVnrArea</th>
+<th data-quarto-table-cell-role="th">BsmtFinSF1</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">WoodDeckSF</th>
+<th data-quarto-table-cell-role="th">OpenPorchSF</th>
+<th data-quarto-table-cell-role="th">EnclosedPorch</th>
+<th data-quarto-table-cell-role="th">3SsnPorch</th>
+<th data-quarto-table-cell-role="th">ScreenPorch</th>
+<th data-quarto-table-cell-role="th">PoolArea</th>
+<th data-quarto-table-cell-role="th">MiscVal</th>
+<th data-quarto-table-cell-role="th">MoSold</th>
+<th data-quarto-table-cell-role="th">YrSold</th>
+<th data-quarto-table-cell-role="th">SalePrice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2433.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2896.000000</td>
+<td>2918.000000</td>
+<td>...</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>2919.000000</td>
+<td>1460.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>1460.000000</td>
+<td>57.137718</td>
+<td>69.305795</td>
+<td>10168.114080</td>
+<td>6.089072</td>
+<td>5.564577</td>
+<td>1971.312778</td>
+<td>1984.264474</td>
+<td>102.201312</td>
+<td>441.423235</td>
+<td>...</td>
+<td>93.709832</td>
+<td>47.486811</td>
+<td>23.098321</td>
+<td>2.602261</td>
+<td>16.062350</td>
+<td>2.251799</td>
+<td>50.825968</td>
+<td>6.213087</td>
+<td>2007.792737</td>
+<td>180921.195890</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>842.787043</td>
+<td>42.517628</td>
+<td>23.344905</td>
+<td>7886.996359</td>
+<td>1.409947</td>
+<td>1.113131</td>
+<td>30.291442</td>
+<td>20.894344</td>
+<td>179.334253</td>
+<td>455.610826</td>
+<td>...</td>
+<td>126.526589</td>
+<td>67.575493</td>
+<td>64.244246</td>
+<td>25.188169</td>
+<td>56.184365</td>
+<td>35.663946</td>
+<td>567.402211</td>
+<td>2.714762</td>
+<td>1.314964</td>
+<td>79442.502883</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>1.000000</td>
+<td>20.000000</td>
+<td>21.000000</td>
+<td>1300.000000</td>
+<td>1.000000</td>
+<td>1.000000</td>
+<td>1872.000000</td>
+<td>1950.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>...</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td>2006.000000</td>
+<td>34900.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>730.500000</td>
+<td>20.000000</td>
+<td>59.000000</td>
+<td>7478.000000</td>
+<td>5.000000</td>
+<td>5.000000</td>
+<td>1953.500000</td>
+<td>1965.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>...</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>4.000000</td>
+<td>2007.000000</td>
+<td>129975.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>1460.000000</td>
+<td>50.000000</td>
+<td>68.000000</td>
+<td>9453.000000</td>
+<td>6.000000</td>
+<td>5.000000</td>
+<td>1973.000000</td>
+<td>1993.000000</td>
+<td>0.000000</td>
+<td>368.500000</td>
+<td>...</td>
+<td>0.000000</td>
+<td>26.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>6.000000</td>
+<td>2008.000000</td>
+<td>163000.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>2189.500000</td>
+<td>70.000000</td>
+<td>80.000000</td>
+<td>11570.000000</td>
+<td>7.000000</td>
+<td>6.000000</td>
+<td>2001.000000</td>
+<td>2004.000000</td>
+<td>164.000000</td>
+<td>733.000000</td>
+<td>...</td>
+<td>168.000000</td>
+<td>70.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>8.000000</td>
+<td>2009.000000</td>
+<td>214000.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>2919.000000</td>
+<td>190.000000</td>
+<td>313.000000</td>
+<td>215245.000000</td>
+<td>10.000000</td>
+<td>9.000000</td>
+<td>2010.000000</td>
+<td>2010.000000</td>
+<td>1600.000000</td>
+<td>5644.000000</td>
+<td>...</td>
+<td>1424.000000</td>
+<td>742.000000</td>
+<td>1012.000000</td>
+<td>508.000000</td>
+<td>576.000000</td>
+<td>800.000000</td>
+<td>17000.000000</td>
+<td>12.000000</td>
+<td>2010.000000</td>
+<td>755000.000000</td>
+</tr>
+</tbody>
+</table>
+
+<p>8 rows × 38 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="valores-nulos" class="level2">
+<h2 class="anchored" data-anchor-id="valores-nulos">Valores nulos</h2>
+<section id="se-mostraran-las-columnas-con-valores-nulos-unicamente-al-ser-demasiadas-columnas-para-una-mejor-lectura" class="level3">
+<h3 class="anchored" data-anchor-id="se-mostraran-las-columnas-con-valores-nulos-unicamente-al-ser-demasiadas-columnas-para-una-mejor-lectura">Se mostraran las columnas con valores nulos unicamente, al ser demasiadas columnas para una mejor lectura</h3>
+<div id="cell-8" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>null_count <span class="op">=</span> house_price.isnull().<span class="bu">sum</span>()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>null_count <span class="op">=</span> null_count[null_count<span class="op">&gt;</span><span class="dv">0</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>null_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>MSZoning           4
+LotFrontage      486
+Alley           2721
+Utilities          2
+Exterior1st        1
+Exterior2nd        1
+MasVnrType      1766
+MasVnrArea        23
+BsmtQual          81
+BsmtCond          82
+BsmtExposure      82
+BsmtFinType1      79
+BsmtFinSF1         1
+BsmtFinType2      80
+BsmtFinSF2         1
+BsmtUnfSF          1
+TotalBsmtSF        1
+Electrical         1
+BsmtFullBath       2
+BsmtHalfBath       2
+KitchenQual        1
+Functional         2
+FireplaceQu     1420
+GarageType       157
+GarageYrBlt      159
+GarageFinish     159
+GarageCars         1
+GarageArea         1
+GarageQual       159
+GarageCond       159
+PoolQC          2909
+Fence           2348
+MiscFeature     2814
+SaleType           1
+SalePrice       1459
+dtype: int64</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="tipo-de-cada-variable" class="level2">
+<h2 class="anchored" data-anchor-id="tipo-de-cada-variable">Tipo de cada Variable</h2>
+<div id="cell-10" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>house_price.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 2919 entries, 0 to 2918
+Data columns (total 81 columns):
+ #   Column         Non-Null Count  Dtype  
+---  ------         --------------  -----  
+ 0   Id             2919 non-null   int64  
+ 1   MSSubClass     2919 non-null   int64  
+ 2   MSZoning       2915 non-null   object 
+ 3   LotFrontage    2433 non-null   float64
+ 4   LotArea        2919 non-null   int64  
+ 5   Street         2919 non-null   object 
+ 6   Alley          198 non-null    object 
+ 7   LotShape       2919 non-null   object 
+ 8   LandContour    2919 non-null   object 
+ 9   Utilities      2917 non-null   object 
+ 10  LotConfig      2919 non-null   object 
+ 11  LandSlope      2919 non-null   object 
+ 12  Neighborhood   2919 non-null   object 
+ 13  Condition1     2919 non-null   object 
+ 14  Condition2     2919 non-null   object 
+ 15  BldgType       2919 non-null   object 
+ 16  HouseStyle     2919 non-null   object 
+ 17  OverallQual    2919 non-null   int64  
+ 18  OverallCond    2919 non-null   int64  
+ 19  YearBuilt      2919 non-null   int64  
+ 20  YearRemodAdd   2919 non-null   int64  
+ 21  RoofStyle      2919 non-null   object 
+ 22  RoofMatl       2919 non-null   object 
+ 23  Exterior1st    2918 non-null   object 
+ 24  Exterior2nd    2918 non-null   object 
+ 25  MasVnrType     1153 non-null   object 
+ 26  MasVnrArea     2896 non-null   float64
+ 27  ExterQual      2919 non-null   object 
+ 28  ExterCond      2919 non-null   object 
+ 29  Foundation     2919 non-null   object 
+ 30  BsmtQual       2838 non-null   object 
+ 31  BsmtCond       2837 non-null   object 
+ 32  BsmtExposure   2837 non-null   object 
+ 33  BsmtFinType1   2840 non-null   object 
+ 34  BsmtFinSF1     2918 non-null   float64
+ 35  BsmtFinType2   2839 non-null   object 
+ 36  BsmtFinSF2     2918 non-null   float64
+ 37  BsmtUnfSF      2918 non-null   float64
+ 38  TotalBsmtSF    2918 non-null   float64
+ 39  Heating        2919 non-null   object 
+ 40  HeatingQC      2919 non-null   object 
+ 41  CentralAir     2919 non-null   object 
+ 42  Electrical     2918 non-null   object 
+ 43  1stFlrSF       2919 non-null   int64  
+ 44  2ndFlrSF       2919 non-null   int64  
+ 45  LowQualFinSF   2919 non-null   int64  
+ 46  GrLivArea      2919 non-null   int64  
+ 47  BsmtFullBath   2917 non-null   float64
+ 48  BsmtHalfBath   2917 non-null   float64
+ 49  FullBath       2919 non-null   int64  
+ 50  HalfBath       2919 non-null   int64  
+ 51  BedroomAbvGr   2919 non-null   int64  
+ 52  KitchenAbvGr   2919 non-null   int64  
+ 53  KitchenQual    2918 non-null   object 
+ 54  TotRmsAbvGrd   2919 non-null   int64  
+ 55  Functional     2917 non-null   object 
+ 56  Fireplaces     2919 non-null   int64  
+ 57  FireplaceQu    1499 non-null   object 
+ 58  GarageType     2762 non-null   object 
+ 59  GarageYrBlt    2760 non-null   float64
+ 60  GarageFinish   2760 non-null   object 
+ 61  GarageCars     2918 non-null   float64
+ 62  GarageArea     2918 non-null   float64
+ 63  GarageQual     2760 non-null   object 
+ 64  GarageCond     2760 non-null   object 
+ 65  PavedDrive     2919 non-null   object 
+ 66  WoodDeckSF     2919 non-null   int64  
+ 67  OpenPorchSF    2919 non-null   int64  
+ 68  EnclosedPorch  2919 non-null   int64  
+ 69  3SsnPorch      2919 non-null   int64  
+ 70  ScreenPorch    2919 non-null   int64  
+ 71  PoolArea       2919 non-null   int64  
+ 72  PoolQC         10 non-null     object 
+ 73  Fence          571 non-null    object 
+ 74  MiscFeature    105 non-null    object 
+ 75  MiscVal        2919 non-null   int64  
+ 76  MoSold         2919 non-null   int64  
+ 77  YrSold         2919 non-null   int64  
+ 78  SaleType       2918 non-null   object 
+ 79  SaleCondition  2919 non-null   object 
+ 80  SalePrice      1460 non-null   float64
+dtypes: float64(12), int64(26), object(43)
+memory usage: 1.8+ MB</code></pre>
+</div>
+</div>
+</section>
+<section id="tipo-de-variables" class="level2">
+<h2 class="anchored" data-anchor-id="tipo-de-variables">Tipo de variables</h2>
+<div id="cell-12" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"./csv/Informaci_n_de_Variables_con_Descripci_n.csv"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Unnamed: 0</th>
+<th data-quarto-table-cell-role="th">Variable</th>
+<th data-quarto-table-cell-role="th">Tipo (Cuantitativa o Cualitativa)</th>
+<th data-quarto-table-cell-role="th">Discreta o Continua / Nominal o Ordinal</th>
+<th data-quarto-table-cell-role="th">Tipo del Dato</th>
+<th data-quarto-table-cell-role="th">Ejemplo</th>
+<th data-quarto-table-cell-role="th">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Id</td>
+<td>Id</td>
+<td>Cuantitativa</td>
+<td>Discreta</td>
+<td>int64</td>
+<td>1</td>
+<td>Identificador único de la propiedad.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>MSSubClass</td>
+<td>MSSubClass</td>
+<td>Cuantitativa</td>
+<td>Discreta</td>
+<td>int64</td>
+<td>60</td>
+<td>Clase del edificio según el tipo de vivienda.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>MSZoning</td>
+<td>MSZoning</td>
+<td>Cualitativa</td>
+<td>Nominal</td>
+<td>object</td>
+<td>RL</td>
+<td>Clasificación de la zona en la que se encuentr...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>LotFrontage</td>
+<td>LotFrontage</td>
+<td>Cuantitativa</td>
+<td>Continua</td>
+<td>float64</td>
+<td>65.0</td>
+<td>Longitud de la fachada de la propiedad en pies.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>LotArea</td>
+<td>LotArea</td>
+<td>Cuantitativa</td>
+<td>Discreta</td>
+<td>int64</td>
+<td>8450</td>
+<td>Tamaño total del lote en pies cuadrados.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">76</td>
+<td>MoSold</td>
+<td>MoSold</td>
+<td>Cuantitativa</td>
+<td>Discreta</td>
+<td>int64</td>
+<td>2</td>
+<td>Mes en el que se vendió la vivienda.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">77</td>
+<td>YrSold</td>
+<td>YrSold</td>
+<td>Cuantitativa</td>
+<td>Discreta</td>
+<td>int64</td>
+<td>2008</td>
+<td>Año en el que se vendió la vivienda.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">78</td>
+<td>SaleType</td>
+<td>SaleType</td>
+<td>Cualitativa</td>
+<td>Nominal</td>
+<td>object</td>
+<td>WD</td>
+<td>Tipo de venta.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">79</td>
+<td>SaleCondition</td>
+<td>SaleCondition</td>
+<td>Cualitativa</td>
+<td>Nominal</td>
+<td>object</td>
+<td>Normal</td>
+<td>Condición de la venta.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">80</td>
+<td>SalePrice</td>
+<td>SalePrice</td>
+<td>Cuantitativa</td>
+<td>Continua</td>
+<td>float64</td>
+<td>208500.0</td>
+<td>Precio final de venta de la vivienda.</td>
+</tr>
+</tbody>
+</table>
+
+<p>81 rows × 7 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="variables-cuantitativas-con-pp-plot" class="level2">
+<h2 class="anchored" data-anchor-id="variables-cuantitativas-con-pp-plot">Variables cuantitativas con PP-plot</h2>
+<div id="cell-14" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>var_cuantitativas <span class="op">=</span> house_price.select_dtypes(include<span class="op">=</span>np.number).drop(columns<span class="op">=</span>[<span class="st">"Id"</span>], errors<span class="op">=</span><span class="st">'ignore'</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>num_vars <span class="op">=</span> <span class="bu">len</span>(var_cuantitativas.columns)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> (num_vars <span class="op">//</span> cols) <span class="op">+</span> (num_vars <span class="op">%</span> cols <span class="op">&gt;</span> <span class="dv">0</span>)  </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(rows, cols, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">5</span> <span class="op">*</span> rows)) </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()  </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>normalidad <span class="op">=</span> {}</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col <span class="kw">in</span> <span class="bu">enumerate</span>(var_cuantitativas.columns):</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Prueba de Kolmogorov-Smirnov</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    stat, p <span class="op">=</span> st.kstest(var_cuantitativas[col], <span class="st">'norm'</span>, </span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>                        args<span class="op">=</span>(var_cuantitativas[col].mean(), var_cuantitativas[col].std()))</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    normalidad[col] <span class="op">=</span> {<span class="st">'Estadístico'</span>: stat, <span class="st">'p-valor'</span>: p, <span class="st">'Normal'</span>: p <span class="op">&gt;</span> <span class="fl">0.05</span>}</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calcular valores esperados y observados para el P-P Plot</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    data_sorted <span class="op">=</span> np.sort(var_cuantitativas[col].dropna()) </span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    cum_prob <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="bu">len</span>(data_sorted))  </span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    norm_data <span class="op">=</span> st.norm.cdf(data_sorted, loc<span class="op">=</span>var_cuantitativas[col].mean(), scale<span class="op">=</span>var_cuantitativas[col].std())</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    axes[i].plot(cum_prob, norm_data, marker<span class="op">=</span><span class="st">'o'</span>, linestyle<span class="op">=</span><span class="st">''</span>, label<span class="op">=</span><span class="st">'Datos'</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    axes[i].plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], color<span class="op">=</span><span class="st">'r'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Línea de referencia'</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(<span class="ss">f'P-P Plot para </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    axes[i].set_xlabel(<span class="st">'Probabilidades Observadas'</span>)</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">'Probabilidades Esperadas'</span>)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    axes[i].legend()</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    axes[i].grid(<span class="va">True</span>)</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="pocas-variables-siguen-una-distribución-normal-de-manera-precisa." class="level3">
+<h3 class="anchored" data-anchor-id="pocas-variables-siguen-una-distribución-normal-de-manera-precisa.">Pocas variables siguen una distribución normal de manera precisa.</h3>
+</section>
+<section id="la-mayoría-de-las-variables-presentan-sesgo-colas-gruesas-o-delgadas-lo-que-indica-que-su-comportamiento-se-aleja-de-la-normalidad." class="level3">
+<h3 class="anchored" data-anchor-id="la-mayoría-de-las-variables-presentan-sesgo-colas-gruesas-o-delgadas-lo-que-indica-que-su-comportamiento-se-aleja-de-la-normalidad.">La mayoría de las variables presentan sesgo, colas gruesas o delgadas, lo que indica que su comportamiento se aleja de la normalidad.</h3>
+</section>
+<section id="en-algunos-casos-las-variables-muestran-segmentación-lo-que-puede-deberse-a-que-tienen-una-naturaleza-discreta-en-lugar-de-continua." class="level3">
+<h3 class="anchored" data-anchor-id="en-algunos-casos-las-variables-muestran-segmentación-lo-que-puede-deberse-a-que-tienen-una-naturaleza-discreta-en-lugar-de-continua.">En algunos casos, las variables muestran segmentación, lo que puede deberse a que tienen una naturaleza discreta en lugar de continua.</h3>
+</section>
+</section>
+<section id="frecuencia-de-variables-cualitativas" class="level2">
+<h2 class="anchored" data-anchor-id="frecuencia-de-variables-cualitativas">Frecuencia de Variables Cualitativas</h2>
+<div id="cell-17" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>var_cualitativas <span class="op">=</span> house_price.select_dtypes(exclude<span class="op">=</span>np.number).drop(columns<span class="op">=</span>[<span class="st">"Id"</span>], errors<span class="op">=</span><span class="st">'ignore'</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_categorical_data(df, column):</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    df[column] <span class="op">=</span> df[column].astype(<span class="bu">str</span>).<span class="bu">str</span>.strip()</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    df[column] <span class="op">=</span> df[column].replace(<span class="st">"nan"</span>, pd.NA).dropna()</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> df[column].<span class="bu">str</span>.contains(<span class="vs">r'\|'</span>, regex<span class="op">=</span><span class="va">True</span>).<span class="bu">any</span>():</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        all_values <span class="op">=</span> df[column].<span class="bu">str</span>.split(<span class="st">'|'</span>).explode()</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> all_values.value_counts()</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df[column].value_counts()</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_frequency_tables(df, qualitative_vars):</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    frequency_tables <span class="op">=</span> {}</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> var <span class="kw">in</span> qualitative_vars:</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        frequency_tables[var] <span class="op">=</span> process_categorical_data(df, var)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> frequency_tables</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> display_frequency_table_as_image(df, column, count):</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="co">    Muestra una tabla de frecuencia como imagen en el notebook para la columna especificada.</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">4</span>, <span class="dv">2</span>))</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    plt.axis(<span class="st">'tight'</span>)</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f"Tabla </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss"> de Frecuencia para </span><span class="sc">{</span>column<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    table_data <span class="op">=</span> df.reset_index()</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    table_data.columns <span class="op">=</span> [column, <span class="st">"Frecuencia"</span>]</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    plt.table(cellText<span class="op">=</span>table_data.values, colLabels<span class="op">=</span>table_data.columns, cellLoc<span class="op">=</span><span class="st">'center'</span>, loc<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>tables <span class="op">=</span> generate_frequency_tables(house_price, var_cualitativas)</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> var, table <span class="kw">in</span> tables.items():</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>    count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    display_frequency_table_as_image(table.head(), var, count)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-4.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-5.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-6.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-7.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-8.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-9.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-10.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-11.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-12.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-13.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-14.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-15.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-16.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-17.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-18.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-19.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-20.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-21.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-22.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-23.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-24.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-25.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-26.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-27.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-28.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-29.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-30.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-31.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-32.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-33.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-34.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-35.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-36.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-37.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-38.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-39.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-40.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-41.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-42.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-10-output-43.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="presentan-distribución-desbalanceada-y-en-algunos-casos-una-alta-cantidad-de-categorías-únicas." class="level3">
+<h3 class="anchored" data-anchor-id="presentan-distribución-desbalanceada-y-en-algunos-casos-una-alta-cantidad-de-categorías-únicas.">Presentan distribución desbalanceada y, en algunos casos, una alta cantidad de categorías únicas.</h3>
+</section>
+<section id="esto-sugiere-que-se-debe-tener-cuidado-al-utilizar-técnicas-de-modelado-que-requieran-un-número-limitado-de-categorías." class="level3">
+<h3 class="anchored" data-anchor-id="esto-sugiere-que-se-debe-tener-cuidado-al-utilizar-técnicas-de-modelado-que-requieran-un-número-limitado-de-categorías.">Esto sugiere que se debe tener cuidado al utilizar técnicas de modelado que requieran un número limitado de categorías.</h3>
+</section>
+</section>
+<section id="cómo-es-la-distribución-de-los-precios-de-las-casas-y-qué-tipo-de-sesgo-tiene" class="level1">
+<h1>¿Cómo es la distribución de los precios de las casas y qué tipo de sesgo tiene?</h1>
+<div id="cell-20" class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>sns.histplot(var_cuantitativas[<span class="st">"SalePrice"</span>], kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">30</span>, color<span class="op">=</span><span class="st">"blue"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribución del Precio de las Casas"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Precio de Venta"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Frecuencia"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-11-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="cómo-varía-el-precio-de-las-casas-según-una-variable-categórica-clave-por-ejemplo-el-tipo-de-vecindario-o-la-calidad-de-la-casa" class="level1">
+<h1>¿Cómo varía el precio de las casas según una variable categórica clave (por ejemplo, el tipo de vecindario o la calidad de la casa)?</h1>
+<div id="cell-22" class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">20</span>, <span class="dv">16</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>sns.boxplot(x<span class="op">=</span>var_cualitativas[<span class="st">"Neighborhood"</span>], y<span class="op">=</span>var_cuantitativas[<span class="st">"SalePrice"</span>])</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribución del Precio por Vecindario"</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Vecindario"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Precio de Venta"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="existe-una-relación-lineal-entre-el-tamaño-de-la-casa-y-su-precio" class="level1">
+<h1>¿Existe una relación lineal entre el tamaño de la casa y su precio?</h1>
+<div id="cell-24" class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>,<span class="dv">6</span>))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>sns.regplot(x<span class="op">=</span>var_cuantitativas[<span class="st">"GrLivArea"</span>], y<span class="op">=</span>var_cuantitativas[<span class="st">"SalePrice"</span>], scatter_kws<span class="op">=</span>{<span class="st">'alpha'</span>:<span class="fl">0.5</span>})</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Relación entre el Tamaño de la Casa y el Precio de Venta"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Tamaño de la Casa (pies cuadrados)"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Precio de Venta"</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="el-precio-de-las-casas-sigue-una-distribución-normal" class="level1">
+<h1>¿El precio de las casas sigue una distribución normal?</h1>
+<div id="cell-26" class="cell" data-execution_count="45">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>stat, p_value <span class="op">=</span> st.kstest(var_cuantitativas[<span class="st">"SalePrice"</span>].dropna(), <span class="st">'norm'</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Kolmogorov-Smirnov para el Precio de las Casas: Estadística=</span><span class="sc">{</span>stat<span class="sc">:.4f}</span><span class="ss">, p-valor=</span><span class="sc">{</span>p_value<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> p_value <span class="op">&lt;</span> <span class="fl">0.05</span>:</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Se rechaza la hipótesis nula: La variable SalePrice NO sigue una distribución normal."</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No se rechaza la hipótesis nula: La variable SalePrice podría seguir una distribución normal."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Kolmogorov-Smirnov para el Precio de las Casas: Estadística=1.0000, p-valor=0.0
+Se rechaza la hipótesis nula: La variable SalePrice NO sigue una distribución normal.</code></pre>
+</div>
+</div>
+</section>
+<section id="cuáles-son-las-variables-cuantitativas-más-cercanas-a-una-distribución-normal-y-cuáles-son-las-más-alejadas" class="level1">
+<h1>¿Cuáles son las variables cuantitativas más cercanas a una distribución normal y cuáles son las más alejadas?</h1>
+<div id="cell-28" class="cell" data-execution_count="46">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> var_cuantitativas.columns:</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> st.anderson(var_cuantitativas[col].dropna(), dist<span class="op">=</span><span class="st">'norm'</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Anderson-Darling para </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">: Estadística=</span><span class="sc">{</span>result<span class="sc">.</span>statistic<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Valores Críticos: </span><span class="sc">{</span>result<span class="sc">.</span>critical_values<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Niveles de Significancia: </span><span class="sc">{</span>result<span class="sc">.</span>significance_level<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Evaluación de la hipótesis: si la estadística es mayor que el valor crítico al 5% de significancia</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    alpha_index <span class="op">=</span> <span class="dv">2</span>  <span class="co"># Índice correspondiente al 5% de significancia</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> result.statistic <span class="op">&gt;</span> result.critical_values[alpha_index]:</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Se rechaza la hipótesis nula para </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">: La variable NO sigue una distribución normal.</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"No se rechaza la hipótesis nula para </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">: La variable podría seguir una distribución normal.</span><span class="ch">\n</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Anderson-Darling para MSSubClass: Estadística=176.2698
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para MSSubClass: La variable NO sigue una distribución normal.
+
+Anderson-Darling para LotFrontage: Estadística=26.1119
+Valores Críticos: [0.575 0.655 0.786 0.916 1.09 ]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para LotFrontage: La variable NO sigue una distribución normal.
+
+Anderson-Darling para LotArea: Estadística=283.9913
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para LotArea: La variable NO sigue una distribución normal.
+
+Anderson-Darling para OverallQual: Estadística=71.1945
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para OverallQual: La variable NO sigue una distribución normal.
+
+Anderson-Darling para OverallCond: Estadística=249.2726
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para OverallCond: La variable NO sigue una distribución normal.
+
+Anderson-Darling para YearBuilt: Estadística=64.1831
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para YearBuilt: La variable NO sigue una distribución normal.
+
+Anderson-Darling para YearRemodAdd: Estadística=142.7645
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para YearRemodAdd: La variable NO sigue una distribución normal.
+
+Anderson-Darling para MasVnrArea: Estadística=372.4549
+Valores Críticos: [0.575 0.655 0.786 0.917 1.09 ]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para MasVnrArea: La variable NO sigue una distribución normal.
+
+Anderson-Darling para BsmtFinSF1: Estadística=102.7672
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para BsmtFinSF1: La variable NO sigue una distribución normal.
+
+Anderson-Darling para BsmtFinSF2: Estadística=852.1977
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para BsmtFinSF2: La variable NO sigue una distribución normal.
+
+Anderson-Darling para BsmtUnfSF: Estadística=52.8713
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para BsmtUnfSF: La variable NO sigue una distribución normal.
+
+Anderson-Darling para TotalBsmtSF: Estadística=26.6325
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para TotalBsmtSF: La variable NO sigue una distribución normal.
+
+Anderson-Darling para 1stFlrSF: Estadística=36.8669
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para 1stFlrSF: La variable NO sigue una distribución normal.
+
+Anderson-Darling para 2ndFlrSF: Estadística=309.9271
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para 2ndFlrSF: La variable NO sigue una distribución normal.
+
+Anderson-Darling para LowQualFinSF: Estadística=1096.0014
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para LowQualFinSF: La variable NO sigue una distribución normal.
+
+Anderson-Darling para GrLivArea: Estadística=30.8617
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para GrLivArea: La variable NO sigue una distribución normal.
+
+Anderson-Darling para BsmtFullBath: Estadística=486.0204
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para BsmtFullBath: La variable NO sigue una distribución normal.
+
+Anderson-Darling para BsmtHalfBath: Estadística=1028.3840
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para BsmtHalfBath: La variable NO sigue una distribución normal.
+
+Anderson-Darling para FullBath: Estadística=418.1176
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para FullBath: La variable NO sigue una distribución normal.
+
+Anderson-Darling para HalfBath: Estadística=534.8282
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para HalfBath: La variable NO sigue una distribución normal.
+
+Anderson-Darling para BedroomAbvGr: Estadística=211.0927
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para BedroomAbvGr: La variable NO sigue una distribución normal.
+
+Anderson-Darling para KitchenAbvGr: Estadística=1050.5764
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para KitchenAbvGr: La variable NO sigue una distribución normal.
+
+Anderson-Darling para TotRmsAbvGrd: Estadística=69.7513
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para TotRmsAbvGrd: La variable NO sigue una distribución normal.
+
+Anderson-Darling para Fireplaces: Estadística=325.1828
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para Fireplaces: La variable NO sigue una distribución normal.
+
+Anderson-Darling para GarageYrBlt: Estadística=62.9274
+Valores Críticos: [0.575 0.655 0.786 0.917 1.09 ]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para GarageYrBlt: La variable NO sigue una distribución normal.
+
+Anderson-Darling para GarageCars: Estadística=227.8760
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para GarageCars: La variable NO sigue una distribución normal.
+
+Anderson-Darling para GarageArea: Estadística=17.9399
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para GarageArea: La variable NO sigue una distribución normal.
+
+Anderson-Darling para WoodDeckSF: Estadística=238.6625
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para WoodDeckSF: La variable NO sigue una distribución normal.
+
+Anderson-Darling para OpenPorchSF: Estadística=229.4365
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para OpenPorchSF: La variable NO sigue una distribución normal.
+
+Anderson-Darling para EnclosedPorch: Estadística=753.2793
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para EnclosedPorch: La variable NO sigue una distribución normal.
+
+Anderson-Darling para 3SsnPorch: Estadística=1101.6511
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para 3SsnPorch: La variable NO sigue una distribución normal.
+
+Anderson-Darling para ScreenPorch: Estadística=921.3870
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para ScreenPorch: La variable NO sigue una distribución normal.
+
+Anderson-Darling para PoolArea: Estadística=1120.1756
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para PoolArea: La variable NO sigue una distribución normal.
+
+Anderson-Darling para MiscVal: Estadística=1029.8632
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para MiscVal: La variable NO sigue una distribución normal.
+
+Anderson-Darling para MoSold: Estadística=25.3206
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para MoSold: La variable NO sigue una distribución normal.
+
+Anderson-Darling para YrSold: Estadística=100.0088
+Valores Críticos: [0.575 0.655 0.786 0.917 1.091]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para YrSold: La variable NO sigue una distribución normal.
+
+Anderson-Darling para SalePrice: Estadística=41.6920
+Valores Críticos: [0.574 0.654 0.785 0.916 1.089]
+Niveles de Significancia: [15.  10.   5.   2.5  1. ]
+Se rechaza la hipótesis nula para SalePrice: La variable NO sigue una distribución normal.
+</code></pre>
+</div>
+</div>
+</section>
+<section id="la-variable-más-correlacionada-con-el-precio-sigue-una-distribución-normal" class="level1">
+<h1>¿La variable más correlacionada con el precio sigue una distribución normal?</h1>
+<div id="cell-30" class="cell" data-execution_count="47">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Identificar la variable más correlacionada con el precio</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>correlaciones <span class="op">=</span> var_cuantitativas.corr()[<span class="st">"SalePrice"</span>].drop(<span class="st">"SalePrice"</span>).<span class="bu">abs</span>()</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>variable_mas_correlacionada <span class="op">=</span> correlaciones.idxmax()</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicar Shapiro-Wilk a esa variable</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>stat, p_value <span class="op">=</span> st.shapiro(var_cuantitativas[variable_mas_correlacionada].dropna())</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Shapiro-Wilk para </span><span class="sc">{</span>variable_mas_correlacionada<span class="sc">}</span><span class="ss">: Estadística=</span><span class="sc">{</span>stat<span class="sc">:.4f}</span><span class="ss">, p-valor=</span><span class="sc">{</span>p_value<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> p_value <span class="op">&lt;</span> <span class="fl">0.05</span>:</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Se rechaza la hipótesis nula: La variable </span><span class="sc">{</span>variable_mas_correlacionada<span class="sc">}</span><span class="ss"> NO sigue una distribución normal.</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"No se rechaza la hipótesis nula: La variable </span><span class="sc">{</span>variable_mas_correlacionada<span class="sc">}</span><span class="ss"> podría seguir una distribución normal.</span><span class="ch">\n</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Shapiro-Wilk para OverallQual: Estadística=0.9481, p-valor=0.0000
+Se rechaza la hipótesis nula: La variable OverallQual NO sigue una distribución normal.
+</code></pre>
+</div>
+</div>
+</section>
+<section id="division-en-grupos" class="level1">
+<h1>Division en grupos</h1>
+<section id="vamos-a-agrupar-las-casas-en-tres-clusters-k3-según-las-siguientes-variables" class="level2">
+<h2 class="anchored" data-anchor-id="vamos-a-agrupar-las-casas-en-tres-clusters-k3-según-las-siguientes-variables">Vamos a agrupar las casas en tres clusters (K=3) según las siguientes variables:</h2>
+<section id="saleprice-precio-de-venta-grlivarea-área-habitable-sobre-el-suelo-overallqual-calidad-general-de-la-casa" class="level3">
+<h3 class="anchored" data-anchor-id="saleprice-precio-de-venta-grlivarea-área-habitable-sobre-el-suelo-overallqual-calidad-general-de-la-casa">SalePrice (Precio de venta), GrLivArea (Área habitable sobre el suelo), OverallQual (Calidad general de la casa)</h3>
+</section>
+</section>
+<section id="estos-atributos-fueron-seleccionados-porque-tienen-una-alta-correlación-con-el-precio-y-representan-información-clave-sobre-la-propiedad." class="level2">
+<h2 class="anchored" data-anchor-id="estos-atributos-fueron-seleccionados-porque-tienen-una-alta-correlación-con-el-precio-y-representan-información-clave-sobre-la-propiedad.">Estos atributos fueron seleccionados porque tienen una alta correlación con el precio y representan información clave sobre la propiedad.</h2>
+<div id="cell-33" class="cell" data-execution_count="51">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Seleccionar las variables para el clustering</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [<span class="st">"SalePrice"</span>, <span class="st">"GrLivArea"</span>, <span class="st">"OverallQual"</span>]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>df_cluster <span class="op">=</span> var_cuantitativas[features].dropna()</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalizar los datos</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>df_scaled <span class="op">=</span> scaler.fit_transform(df_cluster)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplicar K-Means con 3 clusters</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>kmeans <span class="op">=</span> KMeans(n_clusters<span class="op">=</span><span class="dv">3</span>, random_state<span class="op">=</span><span class="dv">42</span>, n_init<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>df_cluster[<span class="st">"Cluster"</span>] <span class="op">=</span> kmeans.fit_predict(df_scaled)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Agregar etiquetas de cluster al dataframe original</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>var_cuantitativas[<span class="st">"Cluster"</span>] <span class="op">=</span> df_cluster[<span class="st">"Cluster"</span>]</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Ver distribución de los clusters</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>sns.pairplot(df_cluster, hue<span class="op">=</span><span class="st">"Cluster"</span>, palette<span class="op">=</span><span class="st">"viridis"</span>, diag_kind<span class="op">=</span><span class="st">"kde"</span>)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-17-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-34" class="cell" data-execution_count="52">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(x<span class="op">=</span>df_cluster[<span class="st">"GrLivArea"</span>], y<span class="op">=</span>df_cluster[<span class="st">"SalePrice"</span>], hue<span class="op">=</span>df_cluster[<span class="st">"Cluster"</span>], palette<span class="op">=</span><span class="st">"viridis"</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribución de Grupos según Precio y Tamaño de la Casa"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Área habitable (sqft)"</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Precio de Venta"</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analisis_exploratorio_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
